@@ -2,6 +2,17 @@ from assets.imports import *
 from ucimlrepo import fetch_ucirepo 
 
 def preprocess_data():
+    """
+    Load and preprocess the Online Shoppers Purchasing Intention dataset from UCI repo.
+    
+    This applies OneHotEncoding to categorical columns and then SMOTE to the training data.
+    
+    Returns:
+        X_train_resampled: pandas DataFrame
+        y_train_resampled: pandas Series
+        X_test: pandas DataFrame
+        y_test: pandas Series
+    """
     # fetch dataset 
     online_shoppers_purchasing_intention_dataset = fetch_ucirepo(id=468) 
   
@@ -23,4 +34,11 @@ def preprocess_data():
     X = X.drop(columns=categorical_cols).reset_index(drop=True)
     X = pd.concat([X, encoded_categorical_df], axis=1)
 
-    return X, y
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
+    
+    # Apply SMOTE to training data
+    smote = SMOTE(random_state=2)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
+    return X_train_resampled, X_test, y_train_resampled, y_test
